@@ -1028,15 +1028,13 @@ def test_install_package_with_prefix(script, data):
     result.did_create(install_path)
 
 
-def test_install_editable_with_prefix(script):
+def _test_install_editable_with_prefix(script, files):
     # make a dummy project
     pkga_path = script.scratch_path / 'pkga'
     pkga_path.mkdir()
-    pkga_path.joinpath("setup.py").write_text(textwrap.dedent("""
-        from setuptools import setup
-        setup(name='pkga',
-              version='0.1')
-    """))
+
+    for fn, contents in files.items():
+        pkga_path.joinpath(fn).write_text(textwrap.dedent(contents))
 
     if hasattr(sys, "pypy_version_info"):
         site_packages = os.path.join(
@@ -1057,6 +1055,34 @@ def test_install_editable_with_prefix(script):
     # assert pkga is installed at correct location
     install_path = script.scratch / site_packages / 'pkga.egg-link'
     result.did_create(install_path)
+
+
+def test_install_editable_with_prefix_setup_py(script):
+    setup_py = """from setuptools import setup
+setup(name='pkga', version='0.1')"""
+    _test_install_editable_with_prefix(script, {"setup.py": setup_py})
+
+
+def test_install_editable_with_prefix_setup_cfg(script):
+    setup_cfg = """[metadata]
+name = pkga
+version = 0.1
+"""
+    pyproject_toml = """[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta
+"""
+    _test_install_editable_with_prefix(
+        script, {"setup.cfg": setup_cfg, "pyproject.toml": pyproject_toml}
+    )
+
+
+def test_install_editable_with_prefix(script):
+    _test_install_editable_with_prefix(script, """
+        from setuptools import setup
+        setup(name='pkga',
+              version='0.1')
+    """)
 
 
 def test_install_package_conflict_prefix_and_user(script, data):

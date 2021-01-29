@@ -1,0 +1,1 @@
+Fixed the bug preventing the use of --editable installs for setup.cfg-only setuptools-based projects.
