@@ -82,11 +82,9 @@ def parse_editable(editable_req):
     url_no_extras, extras = _strip_extras(url)
 
     if os.path.isdir(url_no_extras):
-        if (
-            not os.path.exists(os.path.join(url_no_extras, 'setup.py'))
-            and
-            not os.path.exists(os.path.join(url_no_extras, 'setup.cfg'))
-           ):
+        setup_py = os.path.join(url_no_extras, 'setup.py')
+        setup_cfg = os.path.join(url_no_extras, 'setup.cfg')
+        if not os.path.exists(setup_py) and not os.path.exists(setup_cfg):
             msg = (
                 'File "setup.py" or "setup.cfg" not found. Directory cannot be '
                 'installed in editable mode: {}'
@@ -96,8 +94,7 @@ def parse_editable(editable_req):
             if os.path.isfile(pyproject_path):
                 msg += (
                     '\n(A "pyproject.toml" file was found, but editable '
-                    'mode currently requires a setuptools-based build'
-                    ' ("setup.py" or "setup.cfg" or both).)'
+                    'mode currently requires a setuptools-based build.)'
                 )
             raise InstallationError(msg)
 
